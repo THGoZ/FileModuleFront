@@ -25,7 +25,8 @@ export default function Register() {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     const result = await handleRegister(data.email, data.password, data.name);
-    if (result) {
+    console.log(result);
+    if (result.statusCode === 200) {
       navigate("/login");
     } else {
       window.alert("Error al crear la cuenta");

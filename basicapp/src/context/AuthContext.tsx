@@ -1,9 +1,5 @@
-import {
-  checkSession,
-  deleteSession,
-  login,
-  signup,
-} from "@/api/appwrite/appwrite.api";
+import { checkSession } from "@/api/appwrite/appwrite.api";
+import type { ResponseData } from "@/api/types";
 import type { User } from "@/interfaces/interfaces";
 import {
   createContext,
@@ -12,6 +8,10 @@ import {
   useEffect,
   useState,
 } from "react";
+
+import { jwtDecode } from "jwt-decode";
+import { AuthAPI } from "@/api/auth.api";
+import { decodeToken } from "@/utils/token.utils";
 
 interface AuthState {
   token: string | null;
@@ -23,12 +23,12 @@ interface AuthContextType {
   token: string | null;
   tokenDetails: User | null;
   authState: AuthState;
-  handleLogin: (email: string, password: string) => Promise<boolean>;
+  handleLogin: (email: string, password: string) => Promise<ResponseData<any>>;
   handleRegister: (
     email: string,
     password: string,
     name: string
-  ) => Promise<boolean>;
+  ) => Promise<ResponseData<any>>;
   validateSession: () => Promise<boolean>;
   clearAuth: () => void;
   checkValid: () => boolean;
@@ -39,25 +39,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authState, setAuthState] = useState<AuthState>(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedExpire = localStorage.getItem("expire");
-    const storedDetails = localStorage.getItem("tokenDetails");
-
-    return {
-      token: storedToken,
-      expire: storedExpire,
-      tokenDetails: storedDetails ? JSON.parse(storedDetails) : null,
-    };
+    const storedToken = localStorage.getItem("authToken");
+    if (!storedToken) return { token: null, tokenDetails: null, expire: null };
+    try {
+      const decoded = decodeToken(storedToken);
+      if (!decoded) return { token: null, tokenDetails: null, expire: null };
+      return {
+        token: storedToken,
+        expire: decoded.exp,
+        tokenDetails: {
+          id: decoded.id,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role,
+        },
+      };
+    } catch {
+      localStorage.removeItem("authToken");
+      return { token: null, tokenDetails: null, expire: null };
+    }
   });
 
   const clearAuth = useCallback(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("expire");
-    localStorage.removeItem("tokenDetails");
+    localStorage.removeItem("authToken");
     setAuthState({ token: null, tokenDetails: null, expire: null });
   }, []);
 
-  const handleLogin = async (
+  /*   const handleLogin = async (
     email: string,
     password: string
   ): Promise<boolean> => {
@@ -79,9 +87,79 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(err);
       return false;
     }
+  }; */
+
+  const updateToken = useCallback(
+    (newToken: string) => {
+      try {
+        const decoded: any = jwtDecode(newToken);
+        console.log(decoded);
+        localStorage.setItem("authToken", newToken);
+
+        setAuthState({
+          token: newToken,
+          expire: decoded.exp,
+          tokenDetails: {
+            id: decoded.id,
+            name: decoded.name,
+            email: decoded.email,
+            role: decoded.role,
+          },
+        });
+      } catch (error) {
+        console.error("Token decoding error", error);
+        clearAuth();
+      }
+    },
+    [clearAuth]
+  );
+
+  const handleLogin = async (
+    username: string,
+    password: string
+  ): Promise<ResponseData<any>> => {
+    const response = await AuthAPI.login(username, password);
+    console.log(response.data.id);
+    if (response.statusCode === 200 && response.data.id) {
+      updateToken(response.data.id);
+    }
+    return response;
   };
 
   const handleRegister = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<ResponseData<any>> => {
+    const response = await AuthAPI.register(email, password, name);
+    if (response.statusCode === 200 && response.data.id) {
+      updateToken(response.data.id);
+    }
+    return response;
+  };
+
+  const checkValid = useCallback((): boolean => {
+    if (!authState.token) return false;
+
+    try {
+      const decodedToken: any = jwtDecode(authState.token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      const isValid = decodedToken.exp && decodedToken.exp > currentTime;
+
+      if (!isValid) {
+        clearAuth();
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Token validation error", error);
+      clearAuth();
+      return false;
+    }
+  }, [authState.token, clearAuth]);
+
+  /*   const handleRegister = async (
     email: string,
     password: string,
     name: string
@@ -96,9 +174,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(err);
       return false;
     }
-  };
+  }; */
 
-  const checkValid = () => {
+  /*   const checkValid = () => {
     if (!authState.token || !authState.expire) {
       return false;
     }
@@ -109,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(err);
       return false;
     }
-  };
+  }; */
 
   const validateSession = async (): Promise<boolean> => {
     if (!authState.token) {
@@ -138,7 +216,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      await deleteSession(authState.token as string);
+      /* await deleteSession(authState.token as string); */
       return true;
     } catch (err) {
       console.log(err);

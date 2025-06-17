@@ -1,4 +1,4 @@
-import type { SessionDetails, User } from "../../../../interfaces/interfaces";
+import type { SessionDetails, User } from "@/interfaces/interfaces";
 
 const sessionDataCreate = (expire: string, id: string, userData: User) => {
     const sessionData: SessionDetails = {
