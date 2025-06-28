@@ -15,7 +15,7 @@ export class UsersAPI {
 
     public static async getUser(id: string): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest(`/users/${id}`, 'GET', false);
+            const response = await makeRequest(`/users/${id}`, 'GET', true);
             return response;
         }
         catch (err) {
