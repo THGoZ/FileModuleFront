@@ -1,27 +1,24 @@
 import { createContext, useContext, useState } from "react";
 import {
-  uploadImage as appwriteUploadImage,
-  saveUserImage,
-  getAllImages as appwriteGetAllImages,
   getImagePreview as appwriteGetImagePreview,
   deleteImage as appwriteDeleteImage,
   updateImage as appwriteUpdateImage,
 } from "@/api/appwrite/appwrite.api";
-import type { ImageData } from "@/interfaces/interfaces";
+import type { ImageData, PagedList } from "@/interfaces/interfaces";
+import type { SortOption } from "@/components/sortSelectInput";
+import { ImagesAPI } from "@/api/images.api";
+import type { ResponseData } from "@/api/types";
 
 interface ImagesContextType {
-  uploadImage: (
-    userId: string,
-    file: File,
-    file_name: string,
-    description: string
-  ) => Promise<boolean>;
+  uploadImage: (imageData: FormData) => Promise<ResponseData<any>>;
   getAllImages: (
-    orderBy?: string,
-    orderType?: string,
-    searchterm?: string,
-    userId?: string
-  ) => Promise<void>;
+    page?: number,
+    searchTerm?: string,
+    sortBy?: SortOption,
+    user_id?: string,
+    pageSize?: number,
+    include_user?: boolean
+  ) => Promise<ResponseData<any>>;
   getImagePreview: (id: string) => string | undefined;
   deleteImage: (id: string) => Promise<boolean>;
   editImage: (
@@ -30,56 +27,66 @@ interface ImagesContextType {
     description?: string
   ) => Promise<boolean>;
   deleteMany: (ids: string[]) => Promise<boolean>;
-  images: ImageData[];
+  images: PagedList<ImageData>;
   isLoading: boolean;
 }
 
 const ImagesContext = createContext<ImagesContextType | undefined>(undefined);
 
 export const ImagesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [images, setImages] = useState<ImageData[]>([]);
+  const [images, setImages] = useState<PagedList<ImageData>>({
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize: 5,
+    totalPages: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
 
-  const uploadImage = async (
-    userId: string,
-    file: File,
-    file_name: string,
-    description: string
-  ): Promise<boolean> => {
+  const uploadImage = async (imageData: FormData) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const imageUploaded = await appwriteUploadImage(file);
-      if (imageUploaded) {
-        const result = await saveUserImage(userId, imageUploaded, description);
-        await getAllImages();
-        return result ? true : false;
-      }
-      return false;
-    } catch (err) {
-      console.log(err);
-      return false;
+      const response = await ImagesAPI.uploadImage(imageData);
+      return response;
     } finally {
       setIsLoading(false);
     }
   };
 
   const getAllImages = async (
-    orderBy = "$createdAt",
-    orderType = "desc",
-    searchterm = "",
-    userId = ""
+    page = 1,
+    searchTerm?: string,
+    sortBy?: SortOption,
+    user_id?: string,
+    pageSize = 5,
+    include_user = false
   ) => {
     try {
       setIsLoading(true);
-      const result = await appwriteGetAllImages(
-        orderBy,
-        orderType,
-        searchterm,
-        userId
-      );
-      setImages(result ?? []);
-    } catch (err) {
-      console.log(err);
+      const queryParams: Record<string, string> = {};
+
+      queryParams.page = page.toString();
+
+      queryParams.pageSize = pageSize.toString();
+
+      queryParams.include_user = include_user.toString();
+
+      if (searchTerm) {
+        queryParams.search = searchTerm;
+      }
+      if (sortBy) {
+        queryParams.sortBy = sortBy.key;
+        queryParams.sortOrder = sortBy.direction;
+      }
+      if (user_id) {
+        queryParams.user_id = user_id;
+      }
+
+      const response = await ImagesAPI.getAllImages(queryParams);
+      if (response.statusCode === 200) {
+        setImages(response.responseData.data);
+      }
+      return response;
     } finally {
       setIsLoading(false);
     }

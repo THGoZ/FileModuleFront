@@ -7,16 +7,18 @@ import { Upload, X, FileImage, ArrowLeftIcon } from "lucide-react";
 import { uploadSchema } from "@/schemas/upload.schema";
 import { useImages } from "@/context/ImagesContext";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import SimpleTextInput from "@/components/simpleTextInput";
 import ErrorDisplay from "@/components/errorDisplay";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
+import type { FieldError } from "@/interfaces/interfaces";
 
-interface FormData {
+interface ImageFormData {
   image: FileList;
-  file_name: string;
-  description: string;
+  description?: string;
+  user_id?: string;
+  file_name?: string;
 }
 
 export default function UploadImageForm() {
@@ -31,17 +33,19 @@ export default function UploadImageForm() {
     watch,
     reset,
     resetField,
-  } = useForm<FormData>({
+    setError,
+  } = useForm<ImageFormData>({
     resolver: joiResolver(uploadSchema),
   });
 
   const watchedImage = watch("image");
   const watchedDescription = watch("description");
-  const navigator = useNavigate();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
 
   const { uploadImage, isLoading } = useImages();
-  const { tokenDetails } = useAuth();
-  const {showToast} = useToast();
+  const { tokenDetails: user } = useAuth();
+  const { showToast } = useToast();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,25 +89,52 @@ export default function UploadImageForm() {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: ImageFormData) => {
     setIsUploading(true);
-    if (!tokenDetails) {
-      showToast("Debes iniciar sesión para subir una imagen", "error");
-      navigator("/login");
-    }
+
     try {
-      await uploadImage(
-        tokenDetails?.id as string,
-        data.image[0],
-        data.file_name,
-        data.description
-      );
-      reset();
-      setImagePreview(null);
-      alert("Se ha subido la imagen correctamente!");
+      if (!user) {
+        showToast("Debes iniciar sesión para subir imagenes", "error");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("file", data.image[0]);
+      formData.append("description", data.description || "");
+      formData.append("file_name", data.file_name || "");
+      formData.append("user_id", user.id);
+
+      console.log("Upload data:", {
+        file: data.image[0],
+        file_name: data.file_name,
+        description: data.description,
+        user_id: user?.id,
+      });
+
+      const result = await uploadImage(formData);
+
+      console.log(result);
+
+      if (result.statusCode === 200) {
+        showToast("Imagen subida con éxito", "success");
+        const redirectUrl = params.get("redirectUrl");
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        showToast(result.responseData.message ?? "Error al subir la imagen", "error");
+        if (result.responseData.fieldErrors) {
+          result.responseData.fieldErrors.forEach((error: FieldError) => {
+            setError(error.field as keyof ImageFormData, {
+              type: "manual",
+              message: error.message,
+            });
+          });
+        }
+      }
     } catch (error) {
-      console.error("Error al subir la imagen:", error);
-      alert("Error al subir la imagen. Por favor, inténtalo de nuevo.");
+      console.error("Subir imagen fallido:", error);
     } finally {
       setIsUploading(false);
     }

@@ -8,9 +8,14 @@ export interface User {
 }
 
 export interface ImageData {
-  id: string;
-  path: string;
-  description: string;
+    id: number;
+    user_id: number;
+    path: string;
+    description?: string;
+    file_type: string;
+    file_name: string;
+    created_at: Date;
+    userData?: User;
 }
 
 export interface SessionDetails {
@@ -35,16 +40,8 @@ export interface UserDocument{
     userData?: User;
 }
 
-export interface DocumentList {
-  data: UserDocument[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-export interface UserList {
-  data: User[];
+export interface PagedList<T> {
+  data: T[];
   total: number;
   page: number;
   pageSize: number;

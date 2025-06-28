@@ -10,7 +10,7 @@ export async function makeRequest(
   query?: Record<string, any>,
   returnData: boolean = false,
 ): Promise<ResponseData<any>> {
-  const token = localStorage.getItem('authToken') || '';
+  const token = localStorage.getItem("authToken") || '';
   const baseUrl = import.meta.env.VITE_APP_API_URL as string;
 
   if (!baseUrl) {

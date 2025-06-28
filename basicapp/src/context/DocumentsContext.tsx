@@ -1,7 +1,7 @@
 import { DocumentsAPI } from "@/api/documents.api";
 import type { ResponseData } from "@/api/types";
 import type { SortOption } from "@/components/sortSelectInput";
-import type { DocumentList } from "@/interfaces/interfaces";
+import type { PagedList, UserDocument } from "@/interfaces/interfaces";
 import { createContext, useContext, useState } from "react";
 
 interface DocumentsContextType {
@@ -21,7 +21,7 @@ interface DocumentsContextType {
     file_name: string,
     description: string
   ) => Promise<ResponseData<any>>;
-  documents: DocumentList;
+  documents: PagedList<UserDocument>;
   isLoading: boolean;
 }
 
@@ -34,7 +34,7 @@ export const DocumentsProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [documents, setDocuments] = useState<DocumentList>({
+  const [documents, setDocuments] = useState<PagedList<UserDocument>>({
     data: [],
     total: 0,
     page: 1,

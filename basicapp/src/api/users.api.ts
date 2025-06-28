@@ -4,7 +4,7 @@ import type { ResponseData } from "./types";
 export class UsersAPI {
     public static async getUsers(queryParams?: Record<string, string>): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest('/users', 'GET', false, undefined, undefined, queryParams);
+            const response = await makeRequest('/users', 'GET', true, undefined, undefined, queryParams);
             return response;
         }
         catch (err) {

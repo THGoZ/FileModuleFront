@@ -58,13 +58,13 @@ export default function UploadDocumentForm() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type !== "application/pdf") {
-        alert("Please select a valid PDF file");
+        alert("Seleccione un archivo de PDF válido");
         return;
       }
 
       const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert("File size must be less than 10MB");
+        alert("El tamaño del archivo no puede superar los 10MB");
         return;
       }
 
@@ -115,7 +115,7 @@ export default function UploadDocumentForm() {
       console.log(result);
 
       if (result.statusCode === 200) {
-        showToast("Sesión iniciada con éxito", "success");
+        showToast("Documento subido con éxito", "success");
         const redirectUrl = params.get("redirectUrl");
         if (redirectUrl) {
           navigate(redirectUrl);
@@ -123,7 +123,7 @@ export default function UploadDocumentForm() {
           navigate("/dashboard");
         }
       } else {
-        showToast(result.responseData.message, "error");
+        showToast(result.responseData.message ?? "Error al subir el documento", "error");
         if (result.responseData.fieldErrors) {
           result.responseData.fieldErrors.forEach((error: FieldError) => {
             setError(error.field as keyof DocumentFormData, {

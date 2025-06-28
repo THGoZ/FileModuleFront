@@ -10,6 +10,7 @@ export const uploadSchema = Joi.object({
     "string.min": "Description must be at least 10 characters long",
     "string.max": "Description cannot exceed 500 characters",
   }),
+  user_id: Joi.string().optional(),
 })
 
 export const documentUploadSchema = Joi.object({

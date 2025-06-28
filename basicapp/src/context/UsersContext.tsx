@@ -2,11 +2,11 @@ import type { ResponseData } from "@/api/types";
 import { UsersAPI } from "@/api/users.api";
 import type { SortOption } from "@/components/sortSelectInput";
 import type { UserRole } from "@/constants/enums";
-import type { UserList } from "@/interfaces/interfaces";
+import type { PagedList, User } from "@/interfaces/interfaces";
 import { createContext, useContext, useState } from "react";
 
 interface UsersContextType {
-  users: UserList;
+  users: PagedList<User>;
   isLoading: boolean;
   getUsers: (
     page?: number,
@@ -32,7 +32,7 @@ interface UsersContextType {
 const UsersContext = createContext<UsersContextType | undefined>(undefined);
 
 export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
-  const [users, setUsers] = useState<UserList>({
+  const [users, setUsers] = useState<PagedList<User>>({
     data: [],
     total: 0,
     page: 1,
