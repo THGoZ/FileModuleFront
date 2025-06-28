@@ -27,3 +27,16 @@ h1 {
 }
 
 @import "tailwindcss";
+
+@theme {
+  --animate-wiggle: wiggle 0.2s ease-in-out 2;
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+}

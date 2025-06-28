@@ -9,7 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, User, LogOut, Settings, Image, Upload } from "lucide-react";
+import {
+  Home,
+  User,
+  LogOut,
+  Settings,
+  Image,
+  FileIcon,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
 
@@ -59,14 +66,14 @@ export default function Navbar() {
                 Galeria
               </Button>
             </a>
-            <a href="/upload-image">
+            <a href="/documents">
               <Button
                 variant="ghost"
                 size="sm"
                 className="text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors rounded-none"
               >
-                <Upload className="h-4 w-4 mr-2" />
-                Subir imagen
+                <FileIcon className="h-4 w-4 mr-2" />
+                Documentos
               </Button>
             </a>
           </div>
@@ -75,7 +82,7 @@ export default function Navbar() {
               href="/"
               className="text-xl font-bold text-white hover:text-red-400 transition-colors"
             >
-              WEPP
+              Sistema sin nombre
             </a>
           </div>
 
@@ -89,7 +96,7 @@ export default function Navbar() {
                   >
                     <Avatar className="h-10 w-10 border-2 border-zinc-700">
                       <AvatarImage
-                        src={`https://placeholder.pics/svg/300`}
+                        src={`https://placeaholder.pics/savg/3a00`}
                         alt={user.name}
                       />
                       <AvatarFallback className="bg-red-600 text-white font-medium">
@@ -118,10 +125,28 @@ export default function Navbar() {
                     <User className="mr-2 h-4 w-4" />
                     <span>Ver perfil</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
-                  onClick={() => navigate("/account/images")}>
+                  {user.role === "admin" && (
+                    <DropdownMenuItem
+                      className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                      onClick={() => navigate("/admin/users")}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Administrar usuarios</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                    onClick={() => navigate("/account/images")}
+                  >
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Mis Imagenes</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                    onClick={() => navigate("/account/documents")}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Mis documentos</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-zinc-700" />
                   <DropdownMenuItem
@@ -130,7 +155,9 @@ export default function Navbar() {
                     disabled={isLoggingOut}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>{isLoggingOut ? "Cerrando sesion..." : "Cerrar sesion"}</span>
+                    <span>
+                      {isLoggingOut ? "Cerrando sesion..." : "Cerrar sesion"}
+                    </span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

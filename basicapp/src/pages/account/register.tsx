@@ -1,6 +1,9 @@
 import AnimatedContainer from "@/components/animatedContainter";
+import ErrorDisplay from "@/components/errorDisplay";
 import SimpleTextInput from "@/components/simpleTextInput";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import type { FieldError } from "@/interfaces/interfaces";
 import { registerSchema } from "@/schemas/accounts.schema";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { LoaderCircle, UserPlus } from "lucide-react";
@@ -14,11 +17,14 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
+    resetField
   } = useForm({
     resolver: joiResolver(registerSchema),
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const {showToast} = useToast();
 
   const { handleRegister } = useAuth();
 
@@ -27,9 +33,18 @@ export default function Register() {
     const result = await handleRegister(data.email, data.password, data.name);
     console.log(result);
     if (result.statusCode === 200) {
+      showToast("Cuenta creada con éxito", 'success');
       navigate("/login");
     } else {
-      window.alert("Error al crear la cuenta");
+      showToast(result.responseData.message ?? "Error al crear la cuenta", "error");
+      if (result.responseData.fieldErrors) {
+        result.responseData.fieldErrors.forEach((error : FieldError) => {
+          setError(error.field, {
+            type: "manual",
+            message: error.message,
+          });
+        });
+      }
     }
     setIsLoading(false);
   };
@@ -38,7 +53,7 @@ export default function Register() {
     <AnimatedContainer>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-zinc-100 dark:bg-zinc-800 shadow-2xl"
+        className="flex items-center justify-center my-10 px-4 md:min-w-1/4 py-12 sm:px-6 lg:px-8 bg-zinc-100 dark:bg-zinc-800 shadow-2xl"
       >
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
@@ -54,44 +69,48 @@ export default function Register() {
               Ingresa los datos necesarios para crear una cuenta
             </p>
           </div>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-2">
             <SimpleTextInput
               label="Nombre de usuario"
+              isValid={!errors.name}
+              onClear={() => resetField("name")}
               {...register("name")}
               {...{ autoComplete: "username" }}
             />
             {errors.name && (
-              <p className="text-red-500">{errors.name.message as string}</p>
+              <ErrorDisplay message={errors.name.message as string} />
             )}
             <SimpleTextInput
               label="Correo electrónico"
+              isValid={!errors.email}
+              onClear={() => resetField("email")}
               {...register("email")}
               {...{ autoComplete: "email" }}
             />
             {errors.email && (
-              <p className="text-red-500">{errors.email.message as string}</p>
+              <ErrorDisplay message={errors.email.message as string} />
             )}
             <SimpleTextInput
               label="Contraseña"
-              isPassword={true}
+              isValid={!errors.password}
+              onClear={() => resetField("password")}
+              type="password"
               {...register("password")}
               {...{ autoComplete: "new-password" }}
             />
             {errors.password && (
-              <p className="text-red-500">
-                {errors.password.message as string}
-              </p>
+              <ErrorDisplay message={errors.password.message as string} />
             )}
             <SimpleTextInput
               label="Confirmar contraseña"
-              isPassword={true}
+              isValid={!errors.confirmPassword}
+              onClear={() => resetField("confirmPassword")}
+              type="password"
               {...register("confirmPassword")}
               {...{ autoComplete: "new-password" }}
             />
             {errors.confirmPassword && (
-              <p className="text-red-500">
-                {errors.confirmPassword.message as string}
-              </p>
+              <ErrorDisplay message={errors.confirmPassword.message as string} />
             )}
             <div className="flex items-center justify-start">
               <p className="mt-2 text-sm text-zinc-400">

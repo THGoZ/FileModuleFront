@@ -119,9 +119,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string
   ): Promise<ResponseData<any>> => {
     const response = await AuthAPI.login(username, password);
-    console.log(response.data.id);
-    if (response.statusCode === 200 && response.data.id) {
-      updateToken(response.data.id);
+    console.log(response);
+    if (response.statusCode === 200 && response.responseData.data.id) {
+      updateToken(response.responseData.data.id);
     }
     return response;
   };
@@ -132,8 +132,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     name: string
   ): Promise<ResponseData<any>> => {
     const response = await AuthAPI.register(email, password, name);
-    if (response.statusCode === 200 && response.data.id) {
-      updateToken(response.data.id);
+    if (response.statusCode === 200 && response.responseData.data.id) {
+      updateToken(response.responseData.data.id);
     }
     return response;
   };
@@ -250,10 +250,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       fetchSession();
     }
   }, []);
-
-  useEffect(() => {
-    console.log("authState", authState);
-  }, [authState]);
 
   return (
     <AuthContext.Provider

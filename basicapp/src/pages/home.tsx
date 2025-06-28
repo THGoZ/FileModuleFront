@@ -6,9 +6,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">
-            Bienvenido al hosting de imagenes
+            Bienvenido al hosting
           </h1>
-          <p className="text-zinc-400">Inicia sesion o crea una cuenta para subir imagenes</p>
+          <p className="text-zinc-400">Inicia sesion o crea una cuenta para subir imagenes y/o documentos.</p>
         </div>
         <div className="flex flex-row items-center justify-center space-x-12 my-10">
           <Button

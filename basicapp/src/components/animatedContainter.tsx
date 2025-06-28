@@ -20,7 +20,7 @@ export default function AnimatedContainer({
 
   return (
     <div
-      className={`flex justify-center transform transition-all duration-500 ease-in-out ${
+      className={`transform transition-all duration-500 ease-in-out ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
       }`}
     >

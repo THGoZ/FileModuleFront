@@ -7,6 +7,9 @@ import { joiResolver } from "@hookform/resolvers/joi";
 import { loginSchema } from "@/schemas/accounts.schema";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
+import { useToast } from "@/context/ToastContext";
+import type { FieldError } from "@/interfaces/interfaces";
+import ErrorDisplay from "@/components/errorDisplay";
 
 export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
@@ -14,6 +17,8 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
+    resetField,
   } = useForm({
     resolver: joiResolver(loginSchema),
   });
@@ -21,22 +26,32 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     const result = await handleLogin(data.email, data.password);
 
-    if (result) {
+    if (result.statusCode === 200) {
+      showToast("Sesión iniciada con éxito", "success");
       navigate("/dashboard");
     } else {
-      window.alert("Usuario o contraseña incorrectos");
+      showToast(result.responseData.message ?? "Error al iniciar sesión", "error");
+      if (result.responseData.fieldErrors) {
+        result.responseData.fieldErrors.forEach((error: FieldError) => {
+          setError(error.field, {
+            type: "manual",
+            message: error.message,
+          });
+        });
+      }
     }
     setIsLoading(false);
   };
 
   return (
     <AnimatedContainer>
-      <div className="flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-zinc-100 dark:bg-zinc-800 shadow-2xl">
+      <div className="flex items-center justify-center my-10 px-4 md:min-w-1/4 py-12 sm:px-6 lg:px-8 bg-zinc-100 dark:bg-zinc-800 shadow-2xl">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="mx-auto h-12 w-12 flex items-center justify-center">
@@ -64,20 +79,24 @@ export default function Login() {
             <div className="flex flex-col space-y-4">
               <SimpleTextInput
                 label="Correo electronico"
+                isValid={!errors.email}
+                onClear={() => resetField("email")}
                 {...register("email")}
                 {...{ autoComplete: "email" }}
               />
               {errors.email && (
-                <p className="text-red-500">{errors.email.message as string}</p>
+                <ErrorDisplay message={errors.email.message as string} />
               )}
               <SimpleTextInput
                 label="Contraseña"
-                isPassword={true}
+                type="password"
+                isValid={!errors.password}
+                onClear={() => resetField("password")}
                 {...register("password")}
                 {...{ autoComplete: "current-password" }}
               />
-              {errors.email && (
-                <p className="text-red-500">{errors.email.message as string}</p>
+              {errors.password && (
+                <ErrorDisplay message={errors.password.message as string} />
               )}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">

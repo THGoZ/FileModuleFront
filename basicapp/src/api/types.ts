@@ -13,6 +13,6 @@ export interface ResponseData<T> {
     message: string;
     statusCode: number;
     statusText: string;
-    data: T;
+    responseData: T;
     additionalData?: any;
   }

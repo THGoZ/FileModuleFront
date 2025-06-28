@@ -11,3 +11,8 @@ export const loginSchema = Joi.object({
     email: Joi.string().email({ tlds: { allow: false } }).label('Correo electronico'),
     password: Joi.string().required().min(8).label('Contraseña'),
 });
+
+export const updateUserSchema = Joi.object({
+    email: Joi.string().email({ tlds: { allow: false } }).label('Correo electronico'),
+    name: Joi.string().required().label('Nombre'),
+});

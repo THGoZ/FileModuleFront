@@ -1,25 +1,27 @@
-import type React from "react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { joiResolver } from "@hookform/resolvers/joi"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, X, FileImage } from "lucide-react"
-import { uploadSchema } from "@/schemas/upload.schema"
-import { useImages } from "@/context/ImagesContext"
-import { useAuth } from "@/context/AuthContext"
-import { useNavigate } from "react-router"
-
+import type React from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Upload, X, FileImage, ArrowLeftIcon } from "lucide-react";
+import { uploadSchema } from "@/schemas/upload.schema";
+import { useImages } from "@/context/ImagesContext";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router";
+import SimpleTextInput from "@/components/simpleTextInput";
+import ErrorDisplay from "@/components/errorDisplay";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/context/ToastContext";
 
 interface FormData {
-  image: FileList
-  description: string
+  image: FileList;
+  file_name: string;
+  description: string;
 }
 
 export default function UploadImageForm() {
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     register,
@@ -28,70 +30,84 @@ export default function UploadImageForm() {
     setValue,
     watch,
     reset,
+    resetField,
   } = useForm<FormData>({
     resolver: joiResolver(uploadSchema),
-  })
+  });
 
-  const watchedImage = watch("image")
-  const watchedDescription = watch("description")
+  const watchedImage = watch("image");
+  const watchedDescription = watch("description");
   const navigator = useNavigate();
 
   const { uploadImage, isLoading } = useImages();
   const { tokenDetails } = useAuth();
+  const {showToast} = useToast();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+      const validTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+      ];
       if (!validTypes.includes(file.type)) {
-        alert("Seleccione un archivo de imagen valido (JPEG, PNG, GIF, or WebP)")
-        return
+        alert(
+          "Seleccione un archivo de imagen valido (JPEG, PNG, GIF, or WebP)"
+        );
+        return;
       }
 
-
-      const maxSize = 5 * 1024 * 1024
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert("El tamaño del archivo no puede superar los 5MB")
-        return
+        alert("El tamaño del archivo no puede superar los 5MB");
+        return;
       }
 
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (event) => {
-        setImagePreview(event.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+        setImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
 
-      setValue("image", e.target.files as FileList)
+      setValue("image", e.target.files as FileList);
     }
-  }
+  };
 
   const removeImage = () => {
-    setImagePreview(null)
-    setValue("image", null as any)
-    const fileInput = document.getElementById("image") as HTMLInputElement
+    setImagePreview(null);
+    setValue("image", null as any);
+    const fileInput = document.getElementById("image") as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = ""
+      fileInput.value = "";
     }
-  }
+  };
 
   const onSubmit = async (data: FormData) => {
-    setIsUploading(true)
-    if(!tokenDetails){
-      alert("Por favor, inicie sesión para subir una imagen");
+    setIsUploading(true);
+    if (!tokenDetails) {
+      showToast("Debes iniciar sesión para subir una imagen", "error");
       navigator("/login");
     }
     try {
-      await uploadImage( tokenDetails?.id as string, data.image[0], data.description);
-      reset()
-      setImagePreview(null)
-      alert("Se ha subido la imagen correctamente!")
+      await uploadImage(
+        tokenDetails?.id as string,
+        data.image[0],
+        data.file_name,
+        data.description
+      );
+      reset();
+      setImagePreview(null);
+      alert("Se ha subido la imagen correctamente!");
     } catch (error) {
-      console.error("Error al subir la imagen:", error)
-      alert("Error al subir la imagen. Por favor, inténtalo de nuevo.")
+      console.error("Error al subir la imagen:", error);
+      alert("Error al subir la imagen. Por favor, inténtalo de nuevo.");
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-900 px-4 py-12 sm:px-6 lg:px-8">
@@ -100,26 +116,19 @@ export default function UploadImageForm() {
           <div className="mx-auto h-12 w-12 flex items-center justify-center ">
             <Upload className="h-12 w-12 text-red-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">Sube tu imagen</h2>
-          <p className="mt-2 text-sm text-zinc-400">Comparte tu imagen con una descripción</p>
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
+            Sube tu imagen
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Comparte tu imagen con una descripción
+          </p>
         </div>
 
         <Card className="shadow-2xl border border-zinc-800 bg-zinc-800/50 backdrop-blur-sm rounded-none">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-semibold text-center text-white">Sube tu imagen</CardTitle>
-            <CardDescription className="text-center text-zinc-400">
-              Selecciona una imagen y agrega una descripción para compartirla con otros
-            </CardDescription>
-          </CardHeader>
-
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
               {/* Image Upload Section */}
               <div className="space-y-2">
-                <Label htmlFor="image" className="text-sm font-medium text-zinc-300">
-                  Image *
-                </Label>
-
                 {!imagePreview ? (
                   <div className="relative">
                     <input
@@ -135,8 +144,12 @@ export default function UploadImageForm() {
                           <FileImage className="h-8 w-8 text-zinc-400" />
                         </div>
                         <div>
-                          <p className="text-white font-medium">Haz click aqui para subir una imagen</p>
-                          <p className="text-sm text-zinc-400 mt-1">PNG, JPG, GIF, WebP hasta 5MB</p>
+                          <p className="text-white font-medium">
+                            Haz click aqui para subir una imagen
+                          </p>
+                          <p className="text-sm text-zinc-400 mt-1">
+                            PNG, JPG, GIF, WebP hasta 5MB
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -159,38 +172,54 @@ export default function UploadImageForm() {
                         </button>
                       </div>
                       <p className="text-sm text-zinc-400 mt-2">
-                        {watchedImage?.[0]?.name} ({Math.round((watchedImage?.[0]?.size || 0) / 1024)} KB)
+                        {watchedImage?.[0]?.name} (
+                        {Math.round((watchedImage?.[0]?.size || 0) / 1024)} KB)
                       </p>
                     </div>
                   </div>
                 )}
 
-                {errors.image && <p className="text-sm text-red-400">{errors.image.message}</p>}
+                {errors.image && (
+                  <p className="text-sm text-red-400">{errors.image.message}</p>
+                )}
               </div>
 
               {/* Description Section */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium text-zinc-300">
-                  Description *
-                </Label>
-                <div className="relative">
-                  <textarea
-                    id="description"
-                    placeholder="Describe tu imagen..."
-                    rows={4}
-                    {...register("description")}
-                    className="w-full px-3 py-3 bg-zinc-700/50 border border-zinc-600 text-white placeholder:text-zinc-400 focus:border-red-500 focus:ring-red-500/20 focus:outline-none resize-none"
+                <SimpleTextInput
+                  label="Nombre de la imagen (Opcional)"
+                  isValid={!errors.file_name}
+                  onClear={() => resetField("file_name")}
+                  {...register("file_name")}
+                  {...{ autoComplete: "name" }}
+                />
+                {errors.file_name && (
+                  <ErrorDisplay message={errors.file_name.message as string} />
+                )}
+                <SimpleTextInput
+                  label="Descripción (Opcional)"
+                  isValid={!errors.description}
+                  type="textarea"
+                  onClear={() => resetField("description")}
+                  {...register("description")}
+                  {...{
+                    autoComplete: "description",
+                    rows: 4,
+                    id: "description",
+                  }}
+                />
+                {errors.description && (
+                  <ErrorDisplay
+                    message={errors.description.message as string}
                   />
-                  <div className="absolute bottom-2 right-2 text-xs text-zinc-500">
-                    {watchedDescription?.length || 0}/1000
-                  </div>
-                </div>
-                {errors.description && <p className="text-sm text-red-400">{errors.description.message}</p>}
+                )}
               </div>
 
               {/* Upload Guidelines */}
               <div className="bg-zinc-700/30 border border-zinc-600 p-4">
-                <h4 className="text-sm font-medium text-white mb-2">Reglas de subida</h4>
+                <h4 className="text-sm font-medium text-white mb-2">
+                  Reglas de subida
+                </h4>
                 <ul className="text-xs text-zinc-400 space-y-1">
                   <li>• Formatos soportados: JPEG, PNG, GIF, WebP</li>
                   <li>• Tamaño máximo de archivo: 5MB</li>
@@ -222,13 +251,23 @@ export default function UploadImageForm() {
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  reset()
-                  setImagePreview(null)
+                  reset();
+                  setImagePreview(null);
                 }}
                 className="w-full h-12 rounded-none border-zinc-600 bg-zinc-700/30 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
                 disabled={isUploading}
               >
-                Limpiar formulario  
+                Limpiar formulario
+              </Button>
+              <Button
+                type="button"
+                onClick={() => window.history.back()}
+                className="w-full h-12 rounded-none bg-red-600 hover:bg-red-700 text-white font-medium transition-colors shadow-lg shadow-red-600/20 disabled:bg-red-400 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center space-x-2">
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span>Volver</span>
+                </div>
               </Button>
             </CardFooter>
           </form>
@@ -236,11 +275,14 @@ export default function UploadImageForm() {
 
         <p className="text-center text-sm text-zinc-400">
           Al subir algo algo{" "}
-          <a href="#" className="font-medium text-red-400 hover:text-red-300 transition-colors">
+          <a
+            href="#"
+            className="font-medium text-red-400 hover:text-red-300 transition-colors"
+          >
             Terminos y vicios
           </a>
         </p>
       </div>
     </div>
-  )
+  );
 }

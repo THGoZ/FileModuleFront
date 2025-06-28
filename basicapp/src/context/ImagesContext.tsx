@@ -13,6 +13,7 @@ interface ImagesContextType {
   uploadImage: (
     userId: string,
     file: File,
+    file_name: string,
     description: string
   ) => Promise<boolean>;
   getAllImages: (
@@ -42,6 +43,7 @@ export const ImagesProvider = ({ children }: { children: React.ReactNode }) => {
   const uploadImage = async (
     userId: string,
     file: File,
+    file_name: string,
     description: string
   ): Promise<boolean> => {
     try {

@@ -8,13 +8,45 @@ export interface User {
 }
 
 export interface ImageData {
-    id: string;
-    path: string;
-    description: string;
+  id: string;
+  path: string;
+  description: string;
 }
 
 export interface SessionDetails {
-    id: string;
-    expire: string;
-    userData: User;
+  id: string;
+  expire: string;
+  userData: User;
+}
+
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
+export interface UserDocument{
+    id: number;
+    user_id: number;
+    path: string;
+    description?: string;
+    file_type: string;
+    file_name: string;
+    created_at: Date;
+    userData?: User;
+}
+
+export interface DocumentList {
+  data: UserDocument[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface UserList {
+  data: User[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
