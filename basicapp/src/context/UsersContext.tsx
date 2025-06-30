@@ -3,7 +3,7 @@ import { UsersAPI } from "@/api/users.api";
 import type { SortOption } from "@/components/sortSelectInput";
 import type { UserRole } from "@/constants/enums";
 import type { PagedList, User } from "@/interfaces/interfaces";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 interface UsersContextType {
   users: PagedList<User>;
@@ -41,27 +41,23 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const getUsers = async (
+  const getUsers = useCallback(async (
     page = 1,
     pageSize = 5,
     role = "user" as UserRole,
     search?: string,
     sortBy?: SortOption
-  ) => {
+  ): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
 
-      const queryParams: Record<string, string> = {};
+      const queryParams: Record<string, string> = {
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        role: role,
+      };
 
-      queryParams.page = page.toString();
-
-      queryParams.pageSize = pageSize.toString();
-
-      queryParams.role = role;
-
-      if (search) {
-        queryParams.search = search;
-      }
+      if (search) queryParams.search = search;
       if (sortBy) {
         queryParams.sortBy = sortBy.key;
         queryParams.sortOrder = sortBy.direction;
@@ -75,68 +71,67 @@ export const UsersProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const deleteUser = async (id: string): Promise<ResponseData<any>> => {
+  const deleteUser = useCallback(async (id: string): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      const result = await UsersAPI.deleteUser(id);
-      return result;
+      return await UsersAPI.deleteUser(id);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const updateUser = async (
+  const updateUser = useCallback(async (
     id: string,
-    email?: string,
-    name?: string
+    name?: string,
+    email?: string
   ): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      const result = await UsersAPI.updateUser(id, email, name);
-      return result;
+      return await UsersAPI.updateUser(id, name, email);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const addUser = async (
+  const addUser = useCallback(async (
     email: string,
     name: string,
     password: string
   ): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      const result = await UsersAPI.addUser(email, name, password);
-      return result;
+      return await UsersAPI.addUser(email, name, password);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const deleteUsersBulk = async (ids: number[]): Promise<ResponseData<any>> => {
+  const deleteUsersBulk = useCallback(async (ids: number[]): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      const result = await UsersAPI.deleteUsersBulk(ids);
-      return result;
+      return await UsersAPI.deleteUsersBulk(ids);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      users,
+      isLoading,
+      getUsers,
+      deleteUser,
+      updateUser,
+      addUser,
+      deleteUsersBulk,
+    }),
+    [users, isLoading, getUsers, deleteUser, updateUser, addUser, deleteUsersBulk]
+  );
 
   return (
-    <UsersContext.Provider
-      value={{
-        users,
-        isLoading,
-        getUsers,
-        deleteUser,
-        updateUser,
-        addUser,
-        deleteUsersBulk,
-      }}
-    >
+    <UsersContext.Provider value={contextValue}>
       {children}
     </UsersContext.Provider>
   );

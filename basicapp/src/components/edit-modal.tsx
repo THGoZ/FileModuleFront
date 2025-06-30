@@ -18,6 +18,8 @@ interface EditModalProps {
   description?: string
   children: React.ReactNode
   isLoading?: boolean
+  cancelButtonText?: string
+  saveButtonText?: string
 }
 
 export default function EditModal({
@@ -29,10 +31,12 @@ export default function EditModal({
   description,
   children,
   isLoading = false,
+  cancelButtonText = "Cancelar",
+  saveButtonText = "Guardar",
 }: EditModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-zinc-800 border-zinc-700 text-white max-w-2xl">
+      <DialogContent className={`bg-zinc-800 border-zinc-700 text-white max-w-2xl`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription className="text-zinc-400">{description}</DialogDescription>}
@@ -45,10 +49,10 @@ export default function EditModal({
             className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
             disabled={isLoading}
           >
-            Cancelar
+            {cancelButtonText}
           </Button>
           <Button onClick={onSave} type="submit" className="bg-red-600 hover:bg-red-700 text-white" disabled={isLoading || !isValid}>
-            {isLoading ? "Guardando..." : "Guardar"}
+            {saveButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>

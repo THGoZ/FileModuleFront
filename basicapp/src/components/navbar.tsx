@@ -11,11 +11,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Home,
-  User,
   LogOut,
-  Settings,
   Image,
   FileIcon,
+  UserIcon,
+  ImageIcon,
+  MenuIcon,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
@@ -29,6 +31,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     await logout();
+    navigate("/");
     setIsLoggingOut(false);
   };
 
@@ -88,79 +91,117 @@ export default function Navbar() {
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-10 w-10 rounded-full hover:bg-zinc-800 transition-colors"
+              <>
+                {user.role === "admin" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="relative hover:bg-zinc-800 border border-zinc-800 transition-colors"
+                      >
+                        Administrador
+                        <MenuIcon className="ml-1 h-6 w-6" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-56 bg-zinc-800 border-zinc-700 text-zinc-100 rounded-none"
+                      align="end"
+                      forceMount
+                    >
+                      <DropdownMenuItem
+                        className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                        onClick={() => navigate("/admin/users")}
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Administrar usuarios</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                        onClick={() => navigate("/admin/images")}
+                      >
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        <span>Administrar imágenes</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                        onClick={() => navigate("/admin/documents")}
+                      >
+                        <FileIcon className="mr-2 h-4 w-4" />
+                        <span>Administrar documentos</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
+                {/* Avatar Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-10 w-10 rounded-full hover:bg-zinc-800 transition-colors"
+                    >
+                      <Avatar className="h-10 w-10 border-2 border-zinc-700">
+                        <AvatarImage
+                          src={`https://placeaholder.pics/savg/3a00`}
+                          alt={user.name}
+                        />
+                        <AvatarFallback className="bg-red-600 text-white font-medium">
+                          {getInitials(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 bg-zinc-800 border-zinc-700 text-zinc-100 rounded-none"
+                    align="end"
+                    forceMount
                   >
-                    <Avatar className="h-10 w-10 border-2 border-zinc-700">
-                      <AvatarImage
-                        src={`https://placeaholder.pics/savg/3a00`}
-                        alt={user.name}
-                      />
-                      <AvatarFallback className="bg-red-600 text-white font-medium">
-                        {getInitials(user.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 bg-zinc-800 border-zinc-700 text-zinc-100 rounded-none"
-                  align="end"
-                  forceMount
-                >
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none text-white">
-                        {user.name}
-                      </p>
-                      <p className="text-xs leading-none text-zinc-400">
-                        {user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-zinc-700" />
-                  <DropdownMenuItem className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Ver perfil</span>
-                  </DropdownMenuItem>
-                  {user.role === "admin" && (
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none text-white">
+                          {user.name}
+                        </p>
+                        <p className="text-xs leading-none text-zinc-400">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-zinc-700" />
                     <DropdownMenuItem
                       className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
-                      onClick={() => navigate("/admin/users")}
+                      onClick={() => navigate("/account")}
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Administrar usuarios</span>
+                      <span>Cuenta</span>
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
-                    onClick={() => navigate("/account/images")}
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Mis Imagenes</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
-                    onClick={() => navigate("/account/documents")}
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Mis documentos</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-zinc-700" />
-                  <DropdownMenuItem
-                    className="hover:bg-red-600 focus:bg-red-600 cursor-pointer text-red-400 hover:text-white focus:text-white"
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>
-                      {isLoggingOut ? "Cerrando sesion..." : "Cerrar sesion"}
-                    </span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem
+                      className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                      onClick={() => navigate("/account/images")}
+                    >
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      <span>Mis Imágenes</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
+                      onClick={() => navigate("/account/documents")}
+                    >
+                      <FileIcon className="mr-2 h-4 w-4" />
+                      <span>Mis Documentos</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-zinc-700" />
+                    <DropdownMenuItem
+                      className="hover:bg-red-600 focus:bg-red-600 cursor-pointer text-red-400 hover:text-white focus:text-white"
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>
+                        {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <div className="flex items-center space-x-2">
                 <a href="/login">

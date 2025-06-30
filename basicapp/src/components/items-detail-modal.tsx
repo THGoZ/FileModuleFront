@@ -82,7 +82,7 @@ export default function ItemDetailsModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`bg-zinc-800 border-zinc-700 text-white max-w-4xl max-h-[90vh] overflow-hidden ${className}`}
+        className={`bg-zinc-800 border-zinc-700 text-white max-w-4xl max-h-[90vh] overflow-y-auto ${className}`}
       >
         <DialogHeader className="space-y-3">
           <div className="flex items-start justify-between">

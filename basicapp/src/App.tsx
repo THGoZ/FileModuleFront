@@ -23,6 +23,8 @@ import type { UserRole } from "./constants/enums";
 import { UsersProvider } from "./context/UsersContext";
 import ManageUsers from "./pages/administrator/admin-users";
 import UnauthorizedPage from "./pages/unauthorized";
+import ManageAllImages from "./pages/administrator/admin-images";
+import ManageAllDocuments from "./pages/administrator/admin-documents";
 
 function App() {
   return (
@@ -45,7 +47,7 @@ function App() {
                         element={<PublicRoutes element={<Register />} />}
                       />
                       <Route
-                        path="/account/profile"
+                        path="/account"
                         element={<ProtectedRoutes element={<Profile />} />}
                       />
                       <Route
@@ -79,17 +81,44 @@ function App() {
                         element={
                           <ProtectedRoutes
                             element={<UploadDocumentForm />}
-                            allowedRoles={["user" as UserRole, "admin" as UserRole]}
+                            allowedRoles={[
+                              "user" as UserRole,
+                              "admin" as UserRole,
+                            ]}
                           />
                         }
                       />
                       <Route
                         path="/admin/users"
                         element={
-                          <ProtectedRoutes element={<ManageUsers />} allowedRoles={["admin" as UserRole]} />
+                          <ProtectedRoutes
+                            element={<ManageUsers />}
+                            allowedRoles={["admin" as UserRole]}
+                          />
                         }
                       />
-                      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                      <Route
+                        path="/admin/documents"
+                        element={
+                          <ProtectedRoutes
+                            element={<ManageAllDocuments />}
+                            allowedRoles={["admin" as UserRole]}
+                          />
+                        }
+                      />
+                      <Route
+                        path="/admin/images"
+                        element={
+                          <ProtectedRoutes
+                            element={<ManageAllImages />}
+                            allowedRoles={["admin" as UserRole]}
+                          />
+                        }
+                      />
+                      <Route
+                        path="/unauthorized"
+                        element={<UnauthorizedPage />}
+                      />
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </main>

@@ -103,16 +103,7 @@ export default function UploadDocumentForm() {
       formData.append("file_name", data.file_name || "");
       formData.append("user_id", user.id);
 
-      console.log("Upload data:", {
-        file: data.file[0],
-        file_name: data.file_name,
-        description: data.description,
-        user_id: user?.id,
-      });
-
       const result = await uploadDocument(formData);
-
-      console.log(result);
 
       if (result.statusCode === 200) {
         showToast("Documento subido con éxito", "success");

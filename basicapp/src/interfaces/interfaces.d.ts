@@ -47,3 +47,13 @@ export interface PagedList<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface updatePassword {
+  newPassword: string;
+  confirmPassword: string;
+  password: string;
+}
+
+export interface deleteUser {
+  password: string;
+}

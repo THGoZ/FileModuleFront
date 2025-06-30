@@ -16,3 +16,13 @@ export const updateUserSchema = Joi.object({
     email: Joi.string().email({ tlds: { allow: false } }).label('Correo electronico'),
     name: Joi.string().required().label('Nombre'),
 });
+
+export const updatePasswordSchema = Joi.object({
+    newPassword: Joi.string().required().min(8).label('Contraseña').invalid(Joi.ref('password')),
+    confirmPassword: Joi.string().required().valid(Joi.ref('newPassword')).label('Confirmar contraseña'),
+    password: Joi.string().required().min(8).label('Contraseña actual'),
+})
+
+export const deleteUserSchema = Joi.object({
+    password: Joi.string().required().min(8).label('Contraseña'),
+})

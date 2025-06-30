@@ -71,7 +71,7 @@ export default function CrudItem({
               align="end"
             >
               <DropdownMenuItem
-                onClick={onEdit}
+                onClick={(e) => {onEdit(); e.stopPropagation();}}
                 className="hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer"
               >
                 <Edit className="mr-2 h-4 w-4" />
@@ -80,7 +80,7 @@ export default function CrudItem({
               {customActions.map((action, index) => (
                 <DropdownMenuItem
                   key={index}
-                  onClick={action.onClick}
+                  onClick={(e) => {action.onClick(); e.stopPropagation();}}
                   className={`hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer ${
                     action.variant === "destructive"
                       ? "text-red-400 hover:text-white focus:text-white"
@@ -92,7 +92,7 @@ export default function CrudItem({
                 </DropdownMenuItem>
               ))}
               <DropdownMenuItem
-                onClick={onDelete}
+                onClick={(e) => {onDelete(); e.stopPropagation();}}
                 className="hover:bg-red-600 focus:bg-red-600 cursor-pointer text-red-400 hover:text-white focus:text-white"
               >
                 <Trash2 className="mr-2 h-4 w-4" />

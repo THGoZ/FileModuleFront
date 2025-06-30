@@ -24,6 +24,7 @@ interface ImageFormData {
 export default function UploadImageForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [params] = useSearchParams();
 
   const {
     register,
@@ -41,7 +42,6 @@ export default function UploadImageForm() {
   const watchedImage = watch("image");
   const watchedDescription = watch("description");
   const navigate = useNavigate();
-  const [params] = useSearchParams();
 
   const { uploadImage, isLoading } = useImages();
   const { tokenDetails: user } = useAuth();

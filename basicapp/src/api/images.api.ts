@@ -5,7 +5,7 @@ export class ImagesAPI {
 
     public static async uploadImage(imageData: FormData): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest('/documents/image', 'POST', false, undefined, imageData);
+            const response = await makeRequest('/documents/image', 'POST', true, undefined, imageData);
             return response;
         }
         catch (err) {

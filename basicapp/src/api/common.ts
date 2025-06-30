@@ -59,7 +59,6 @@ export async function makeRequest(
 
   let responseJson: any = {};
   try {
-    console.log(payload);
     fullResponse = await fetch(url, payload);
 
     if (returnData) {

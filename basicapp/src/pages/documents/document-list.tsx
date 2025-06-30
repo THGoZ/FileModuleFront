@@ -186,7 +186,7 @@ export default function DocumentList() {
             </p>
             <Button
               variant="outline"
-              className="border-zinc-600 bg-zinc-700/30 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+              className="border-zinc-800 bg-zinc-700/30 shadow-md shadow-zinc-900/20 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
               onClick={() => clearAndReload()}
             >
               <RefreshCwIcon className="h-4 w-4" />
@@ -251,7 +251,7 @@ export default function DocumentList() {
                         e.stopPropagation();
                         handleDownload(document);
                       }}
-                      className="bg-red-600 hover:bg-red-700 text-white rounded-none
+                      className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 text-white rounded-none
                       active:scale-90 transition-transform active:bg-red-500"
                       size="sm"
                     >
@@ -270,7 +270,7 @@ export default function DocumentList() {
 
   return (
     <div className="min-h-screen bg-zinc-900 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white mb-2">
@@ -391,7 +391,7 @@ export default function DocumentList() {
                 <Button
                   onClick={() => handleDownload(selectedItem)}
                   type="submit"
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/20 text-white"
                   disabled={isLoading}
                 >
                   <DownloadIcon className="h-4 w-4" />

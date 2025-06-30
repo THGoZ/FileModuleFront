@@ -4,7 +4,7 @@ import type { ResponseData } from "./types";
 export class UsersAPI {
     public static async getUsers(queryParams?: Record<string, string>): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest('/users', 'GET', true, undefined, undefined, queryParams);
+            const response = await makeRequest('/users/admin', 'GET', true, undefined, undefined, queryParams);
             return response;
         }
         catch (err) {
@@ -24,9 +24,9 @@ export class UsersAPI {
         }
     };
 
-    public static async updateUser(id: string, email?: string, name?: string): Promise<ResponseData<any>> {
+    public static async updateUser(id: string, name?: string, email?: string): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest(`/users/${id}`, 'PUT', false, {email, name});
+            const response = await makeRequest(`/users/admin/${id}`, 'PATCH', true, { name, email });
             return response;
         }
         catch (err) {
@@ -37,7 +37,7 @@ export class UsersAPI {
 
     public static async deleteUser(id: string): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest(`/users/${id}`, 'DELETE', false);
+            const response = await makeRequest(`/users/admin/${id}`, 'DELETE', true);
             return response;
         }
         catch (err) {
@@ -48,7 +48,7 @@ export class UsersAPI {
 
     public static async deleteUsersBulk(ids: number[]): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest(`/users/bulk`, 'DELETE', false, {ids});
+            const response = await makeRequest(`/users/admin/bulk`, 'DELETE', true, { ids });
             return response;
         }
         catch (err) {
@@ -59,7 +59,7 @@ export class UsersAPI {
 
     public static async addUser(email: string, name: string, password: string): Promise<ResponseData<any>> {
         try {
-            const response = await makeRequest('/users', 'POST', false, {email, name, password});
+            const response = await makeRequest('/users/admin', 'POST', true, { name, email, password });
             return response;
         }
         catch (err) {

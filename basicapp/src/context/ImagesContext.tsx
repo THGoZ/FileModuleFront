@@ -1,16 +1,21 @@
 import { createContext, useContext, useState } from "react";
 import {
   getImagePreview as appwriteGetImagePreview,
-  deleteImage as appwriteDeleteImage,
   updateImage as appwriteUpdateImage,
 } from "@/api/appwrite/appwrite.api";
 import type { ImageData, PagedList } from "@/interfaces/interfaces";
 import type { SortOption } from "@/components/sortSelectInput";
 import { ImagesAPI } from "@/api/images.api";
 import type { ResponseData } from "@/api/types";
+import { DocumentsAPI } from "@/api/documents.api";
 
 interface ImagesContextType {
   uploadImage: (imageData: FormData) => Promise<ResponseData<any>>;
+  updateImage: (
+    id: number,
+    file_name: string,
+    description: string
+  ) => Promise<ResponseData<any>>;
   getAllImages: (
     page?: number,
     searchTerm?: string,
@@ -20,13 +25,13 @@ interface ImagesContextType {
     include_user?: boolean
   ) => Promise<ResponseData<any>>;
   getImagePreview: (id: string) => string | undefined;
-  deleteImage: (id: string) => Promise<boolean>;
+  deleteImage: (id: number) => Promise<ResponseData<any>>;
   editImage: (
     id: string,
     path?: string,
     description?: string
   ) => Promise<boolean>;
-  deleteMany: (ids: string[]) => Promise<boolean>;
+  bulkDeleteImages: (ids: number[]) => Promise<ResponseData<any>>;
   images: PagedList<ImageData>;
   isLoading: boolean;
 }
@@ -47,6 +52,24 @@ export const ImagesProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       const response = await ImagesAPI.uploadImage(imageData);
+      return response;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateImage = async (
+    id: number,
+    file_name: string,
+    description: string
+  ) => {
+    try {
+      setIsLoading(true);
+      const response = await DocumentsAPI.updateDocument(
+        id.toString(),
+        file_name,
+        description
+      );
       return response;
     } finally {
       setIsLoading(false);
@@ -104,31 +127,23 @@ export const ImagesProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const deleteImage = async (id: string): Promise<boolean> => {
+  const deleteImage = async (id: number): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      const result = await appwriteDeleteImage(id);
-      await getAllImages();
-      return result ? true : false;
-    } catch (err) {
-      console.log(err);
-      return false;
+      const result = await DocumentsAPI.deleteDocument(id.toString());
+      return result;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteMany = async (ids: string[]): Promise<boolean> => {
+  const bulkDeleteImages = async (
+    ids: number[]
+  ): Promise<ResponseData<any>> => {
     try {
       setIsLoading(true);
-      ids.forEach(async (id) => {
-        await appwriteDeleteImage(id);
-      });
-      await getAllImages();
-      return true;
-    } catch (err) {
-      console.log(err);
-      return false;
+      const result = await DocumentsAPI.bulkDeleteDocuments(ids);
+      return result;
     } finally {
       setIsLoading(false);
     }
@@ -152,11 +167,12 @@ export const ImagesProvider = ({ children }: { children: React.ReactNode }) => {
     <ImagesContext.Provider
       value={{
         uploadImage,
+        updateImage,
         getAllImages,
         getImagePreview,
         deleteImage,
         editImage,
-        deleteMany,
+        bulkDeleteImages,
         images,
         isLoading,
       }}

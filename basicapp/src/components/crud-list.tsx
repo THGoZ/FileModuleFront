@@ -114,6 +114,7 @@ interface CrudListProps<T> {
   totalItems?: number;
   page?: number;
   totalPages?: number;
+  pagesize?: number;
   setPage?: (page: number) => void;
 }
 
@@ -155,6 +156,7 @@ export default function CrudList<T>({
   page,
   totalPages,
   setPage,
+  pagesize = 5,
 }: CrudListProps<T>) {
   const renderList = () => {
     if (isLoading) {
@@ -177,7 +179,7 @@ export default function CrudList<T>({
             {emptyState.action && emptyState.actionLabel && (
               <Button
                 variant="outline"
-                className="border-zinc-600 bg-zinc-700/30 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+                className="border-zinc-800 bg-zinc-700/30 shadow-md shadow-zinc-900/20 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
                 onClick={() => emptyState.action?.()}
               >
                 {emptyState.actionIcon}
@@ -214,7 +216,7 @@ export default function CrudList<T>({
               </div>
               {page && totalPages && totalItems && (
                 <div className="text-sm text-zinc-400">
-                  Mostrando {Math.min(page * 5, totalItems)} de {totalItems}{" "}
+                  Mostrando {Math.min(page * pagesize, totalItems)} de {totalItems}{" "}
                   {itemLabel}
                 </div>
               )}
@@ -261,7 +263,7 @@ export default function CrudList<T>({
             <div className="flex items-center gap-2">
               <Button
                 onClick={onAdd}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {addButtonLabel}
@@ -272,7 +274,7 @@ export default function CrudList<T>({
             <div className="flex items-center gap-2">
               <Button
                 onClick={addModal.onOpenAddModal}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {addButtonLabel}

@@ -30,6 +30,17 @@ interface AuthContextType {
     name: string
   ) => Promise<ResponseData<any>>;
   validateSession: () => Promise<boolean>;
+  updateUserDetails: (
+    id: string,
+    name?: string,
+    email?: string
+  ) => Promise<ResponseData<any>>;
+  handlePasswordChange: (
+    id: string,
+    password: string,
+    newPassword: string
+  ) => Promise<ResponseData<any>>;
+  deleteUser: (id: string, password: string) => Promise<ResponseData<any>>;
   clearAuth: () => void;
   checkValid: () => boolean;
   logout: () => Promise<boolean>;
@@ -134,6 +145,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const response = await AuthAPI.register(email, password, name);
     if (response.statusCode === 200 && response.responseData.data.id) {
       updateToken(response.responseData.data.id);
+    }
+    return response;
+  };
+
+  const updateUserDetails = async (
+    id: string,
+    name?: string,
+    email?: string
+  ) => {
+    const response = await AuthAPI.updateUser(id, name, email);
+    if (response.statusCode === 204 && authState.tokenDetails) {
+      setAuthState({
+        ...authState,
+        tokenDetails: {
+          ...authState.tokenDetails,
+          name: name ?? authState.tokenDetails.name,
+          email: email ?? authState.tokenDetails.email,
+        },
+      });
+    }
+    return response;
+  };
+
+  const handlePasswordChange = async (
+    id: string,
+    password: string,
+    newPassword: string
+  ) => {
+    const response = await AuthAPI.updatePassword(id, password, newPassword);
+    return response;
+  };
+
+  const deleteUser = async (id: string, password: string): Promise<ResponseData<any>> => {
+    const response = await AuthAPI.deleteUser(id, password);
+    if (response.statusCode === 204) {
+      clearAuth();
     }
     return response;
   };
@@ -259,6 +306,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         authState,
         handleLogin,
         handleRegister,
+        updateUserDetails,
+        handlePasswordChange,
+        deleteUser,
         clearAuth,
         validateSession,
         checkValid,
