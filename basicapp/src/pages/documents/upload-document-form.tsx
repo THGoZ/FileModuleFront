@@ -29,6 +29,13 @@ interface DocumentFormData {
   file_name?: string;
 }
 
+const allowedTypes = [
+  "application/pdf",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+];
+
 export default function UploadDocumentForm() {
   const [documentInfo, setDocumentInfo] = useState<DocumentInfo | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -57,8 +64,8 @@ export default function UploadDocumentForm() {
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type !== "application/pdf") {
-        alert("Seleccione un archivo de PDF válido");
+      if (!allowedTypes.includes(file.type)) {
+        alert("Solo se permiten archivos PDF o CSV válidos");
         return;
       }
 
@@ -114,7 +121,10 @@ export default function UploadDocumentForm() {
           navigate("/dashboard");
         }
       } else {
-        showToast(result.responseData.message ?? "Error al subir el documento", "error");
+        showToast(
+          result.responseData.message ?? "Error al subir el documento",
+          "error"
+        );
         if (result.responseData.fieldErrors) {
           result.responseData.fieldErrors.forEach((error: FieldError) => {
             setError(error.field as keyof DocumentFormData, {
@@ -156,7 +166,7 @@ export default function UploadDocumentForm() {
                     <input
                       id="document"
                       type="file"
-                      accept=".pdf,application/pdf"
+                      accept=".pdf,application/pdf,.csv,text/csv"
                       onChange={handleDocumentChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
@@ -167,10 +177,11 @@ export default function UploadDocumentForm() {
                         </div>
                         <div>
                           <p className="text-white font-medium">
-                            Haz clic para subir un documento PDF
+                            Haz clic para subir un documento PDF o CSV
                           </p>
+
                           <p className="text-sm text-zinc-400 mt-1">
-                            Archivos PDF hasta 5MB
+                            Archivos PDF o CSV hasta 5MB
                           </p>
                         </div>
                       </div>
@@ -207,7 +218,10 @@ export default function UploadDocumentForm() {
                               {formatDate(documentInfo.lastModified)}
                             </p>
                             <p className="text-xs text-zinc-400">
-                              Tipo: Documento PDF
+                              Tipo:{" "}
+                              {documentInfo.type === "application/pdf"
+                                ? "Documento PDF"
+                                : "Archivo CSV"}
                             </p>
                           </div>
                         </div>
@@ -258,7 +272,8 @@ export default function UploadDocumentForm() {
                   Reglas de subida
                 </h4>
                 <ul className="text-xs text-zinc-400 space-y-1">
-                  <li>• Solo se admiten archivos PDF</li>
+                  <li>• Solo se admiten archivos PDF o CSV</li>
+                  <li>• Tamaño máximo: 5MB</li>
                   <li>• Tamaño máximo: 5MB</li>
                   <li>
                     • Si no se proporciona un nombre, se utilizará el nombre del

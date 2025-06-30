@@ -8,12 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { LoaderCircleIcon } from "lucide-react"
 
 interface EditModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: () => void
-  isValid?: boolean
   title: string
   description?: string
   children: React.ReactNode
@@ -26,7 +26,6 @@ export default function EditModal({
   isOpen,
   onClose,
   onSave,
-  isValid = true,
   title,
   description,
   children,
@@ -51,7 +50,8 @@ export default function EditModal({
           >
             {cancelButtonText}
           </Button>
-          <Button onClick={onSave} type="submit" className="bg-red-600 hover:bg-red-700 text-white" disabled={isLoading || !isValid}>
+          <Button onClick={onSave} type="submit" className="bg-red-600 hover:bg-red-700 text-white" disabled={isLoading}>
+            {isLoading && <LoaderCircleIcon className="animate-spin h-5 w-5 mr-1" />}
             {saveButtonText}
           </Button>
         </DialogFooter>

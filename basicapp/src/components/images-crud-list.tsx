@@ -160,12 +160,12 @@ export default function ImagesCRUDList({
               : "Se eliminaron " +
                 result.responseData.data.deletedIds.length +
                 " imagenes";
-          if (result.responseData.data.notDeletedIds.length !== 0) {
+          if (result.responseData.data.notFoundIds.length !== 0) {
             const warningMessage =
-              result.responseData.data.notDeletedIds.length === 1
+              result.responseData.data.notFoundIds.length === 1
                 ? "No se eliminó una imagen"
                 : "No se eliminaron " +
-                  result.responseData.data.deletedIds.length +
+                  result.responseData.data.notFoundIds.length +
                   " imagenes";
             showToast(warningMessage, "warning");
           }

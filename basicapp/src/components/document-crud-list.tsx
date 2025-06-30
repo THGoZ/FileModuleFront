@@ -277,6 +277,7 @@ export default function DocumentsCRUDList({
     if (selectedDocuments.length === 0) return;
     try {
       const result = await bulkDeleteDocuments(selectedDocuments);
+      console.log(result);
       if (result.statusCode === 200) {
         if (!result.responseData.data.deletedIds) {
           showToast("Documentos eliminados con éxito", "success");
@@ -288,12 +289,12 @@ export default function DocumentsCRUDList({
                 result.responseData.data.deletedIds.length +
                 " documentos";
 
-          if (result.responseData.data.notDeletedIds.length !== 0) {
+          if (result.responseData.data.notFoundIds.length !== 0) {
             const warningMessage =
-              result.responseData.data.notDeletedIds.length === 1
-                ? "No se eliminó un elemento"
+              result.responseData.data.notFoundIds.length === 1
+                ? "No se eliminó un documento"
                 : "No se eliminaron " +
-                  result.responseData.data.deletedIds.length +
+                  result.responseData.data.notFoundIds.length +
                   " documentos";
             showToast(warningMessage, "warning");
           }

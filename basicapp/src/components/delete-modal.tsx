@@ -1,4 +1,3 @@
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,16 +7,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { LoaderCircleIcon } from "lucide-react";
 
 interface DeleteModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title?: string
-  description?: string
-  itemName?: string
-  isLoading?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title?: string;
+  description?: string;
+  itemName?: string;
+  isLoading?: boolean;
 }
 
 export default function DeleteModal({
@@ -35,11 +35,16 @@ export default function DeleteModal({
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-zinc-400">
-            {itemName ? `Seguro que quieres eliminar "${itemName}"? Esta acción no se puede deshacer.` : description}
+            {itemName
+              ? `Seguro que quieres eliminar "${itemName}"? Esta acción no se puede deshacer.`
+              : description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="border-zinc-600 text-zinc-300 hover:bg-zinc-700" disabled={isLoading}>
+          <AlertDialogCancel
+            className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+            disabled={isLoading}
+          >
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction
@@ -47,10 +52,11 @@ export default function DeleteModal({
             className="bg-red-600 hover:bg-red-700 text-white"
             disabled={isLoading}
           >
+            {isLoading && <LoaderCircleIcon className="animate-spin h-5 w-5 mr-1" />}
             {isLoading ? "Borrando..." : "Borrar"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
