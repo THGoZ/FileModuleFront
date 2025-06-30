@@ -25,7 +25,6 @@ interface DocumentInfo {
 interface DocumentFormData {
   file: FileList;
   description?: string;
-  user_id?: string;
   file_name?: string;
 }
 
@@ -108,7 +107,6 @@ export default function UploadDocumentForm() {
       formData.append("file", data.file[0]);
       formData.append("description", data.description || "");
       formData.append("file_name", data.file_name || "");
-      formData.append("user_id", user.id);
 
       const result = await uploadDocument(formData);
 
